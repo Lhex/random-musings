@@ -20,6 +20,8 @@ from keras.models import Sequential
 from keras.layers import Dense
 from keras.wrappers.scikit_learn import KerasClassifier
 from keras.utils import np_utils
+from sklearn.metrics import confusion_matrix
+from sklearn.model_selection import train_test_split
 from sklearn.model_selection import cross_val_score
 from sklearn.model_selection import KFold
 from sklearn.preprocessing import LabelEncoder
@@ -33,16 +35,15 @@ numpy.random.seed(seed)
 #%%
 # load dataset
 dataframe = datasets.load_breast_cancer()
-X = dataframe.data[:,0:30].astype(float)
-Y = dataframe.target
+df = dataframe.data[:,0:30].astype(float)
+y = dataframe.target
 
-# encode class values as integers
-encoder = LabelEncoder()
-encoder.fit(Y)
-encoded_Y = encoder.transform(Y)
+X_train, X_test, y_train, y_test = train_test_split(df, y, test_size=0.2)
+print (X_train.shape, y_train.shape)
+print (X_test.shape, y_test.shape)
 
-# convert integers to dummy variables (i.e. one hot encoded)
-dummy_y = np_utils.to_categorical(encoded_Y)
+y_train = keras.utils.to_categorical(y_train, num_classes=2)
+
 #%%
 
 #define baseline model
@@ -67,9 +68,49 @@ def baseline_model():
 #model.fit(X, Y, nb_epoch=500, batch_size=5)
 #scores = model.evaluate(X, Y)
 #print("%s: %.2f%%" % (model.metrics_names[1], scores[1]*100))
-estimator = KerasClassifier(build_fn=baseline_model, epochs=150, batch_size=10, verbose=1)
 #
-kfold = KFold(n_splits=10, shuffle=True, random_state=seed)
+#estimator = KerasClassifier(build_fn=baseline_model, epochs=150, batch_size=10, verbose=1)
 #
-results = cross_val_score(estimator, X, Y, cv=kfold)
-print("Baseline: %.2f%% (%.2f%%)" % (results.mean()*100, results.std()*100))
+#kfold = KFold(n_splits=10, shuffle=True, random_state=seed)
+#
+#results = cross_val_score(estimator, X, Y, cv=kfold)
+#print("Baseline: %.2f%% (%.2f%%)" % (results.mean()*100, results.std()*100))
+
+#%%
+
+model = Sequential()
+model.add(Dense(30, input_dim = 30, init = 'uniform', activation = 'relu'))
+model.add(Dense(10, init = 'uniform', activation = 'relu'))
+model.add(Dense(2, init = 'uniform', activation = 'sigmoid'))
+model.compile(loss='binary_crossentropy', optimizer='adam',metrics=['accuracy'])
+
+model.fit(x = X_train, y = y_train, epochs = 200, batch_size = 32, validation_split = 0.1, verbose = 1)
+
+y_pred = model.predict_classes(x = X_test, verbose = 1)
+
+#%%
+
+from sklearn.metrics import classification_report,confusion_matrix
+
+print(confusion_matrix(y_test, y_pred))
+
+#%%
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

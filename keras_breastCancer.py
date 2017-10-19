@@ -84,7 +84,7 @@ model.add(Dense(10, init = 'uniform', activation = 'relu'))
 model.add(Dense(2, init = 'uniform', activation = 'sigmoid'))
 model.compile(loss='binary_crossentropy', optimizer='adam',metrics=['accuracy'])
 
-model.fit(x = X_train, y = y_train, epochs = 200, batch_size = 32, validation_split = 0.1, verbose = 1)
+model.fit(x = X_train, y = y_train, epochs = 200, batch_size = 32, validation_split = 0.1, verbose = 0)
 
 y_pred = model.predict_classes(x = X_test, verbose = 1)
 
